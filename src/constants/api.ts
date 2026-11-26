@@ -43,4 +43,20 @@ export const API_ENDPOINTS = {
   ADMIN_USERS_EXPORT: "/api/admin/users/export",
   ADMIN_PRODUCTS_EXPORT: "/api/admin/products/export",
   ADMIN_COMBOS_EXPORT: "/api/admin/combos/export",
+  ADMIN_BUSINESS_PARTNERS: "/api/admin/business/partners",
+  ADMIN_BUSINESS_PARTNER: (id: string) => `/api/admin/business/partners/${id}`,
+  ADMIN_BUSINESS_EXPENSES: (partnerId: string) =>
+    `/api/admin/business/partners/${partnerId}/expenses`,
+  ADMIN_BUSINESS_EXPENSE: (partnerId: string, id: string) =>
+    `/api/admin/business/partners/${partnerId}/expenses/${id}`,
+  ADMIN_BUSINESS_CREDITS: (partnerId: string) =>
+    `/api/admin/business/partners/${partnerId}/credits`,
+  ADMIN_BUSINESS_CREDIT: (partnerId: string, id: string) =>
+    `/api/admin/business/partners/${partnerId}/credits/${id}`,
+  ADMIN_BUSINESS_CREDIT_COLLECT: (partnerId: string, id: string) =>
+    `/api/admin/business/partners/${partnerId}/credits/${id}/collect`,
+  ADMIN_BUSINESS_SALES: (partnerId: string) =>
+    `/api/admin/business/partners/${partnerId}/sales`,
+  ADMIN_BUSINESS_SALE: (partnerId: string, id: string) =>
+    `/api/admin/business/partners/${partnerId}/sales/${id}`,
 } as const;

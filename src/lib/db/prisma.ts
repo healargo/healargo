@@ -1,4 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { ensureDatabaseEnv } from "@/lib/db/supabase-database-url";
+
+ensureDatabaseEnv();
 
 const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
@@ -19,8 +22,6 @@ if (process.env.NODE_ENV !== "production") {
 
 /** Optional explicit connect helper for scripts / legacy call sites. */
 export async function connectDb(): Promise<PrismaClient> {
-  if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL is not set (Supabase Postgres connection string)");
-  }
+  ensureDatabaseEnv();
   return prisma;
 }

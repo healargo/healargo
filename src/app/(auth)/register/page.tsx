@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { RegisterForm } from "@/components/features/auth/RegisterForm";
 import { auth } from "@/lib/auth/auth";
+import { isGoogleAuthEnabled } from "@/lib/auth/google";
 import { getPostLoginRoute } from "@/lib/auth/post-login";
 
 export default async function RegisterPage() {
@@ -9,9 +10,5 @@ export default async function RegisterPage() {
     redirect(getPostLoginRoute());
   }
 
-  const googleEnabled = Boolean(
-    process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
-  );
-
-  return <RegisterForm googleEnabled={googleEnabled} />;
+  return <RegisterForm googleEnabled={isGoogleAuthEnabled()} />;
 }

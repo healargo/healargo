@@ -48,6 +48,8 @@ export const ROUTES = {
     REVIEWS: "/admin/reviews",
     CAROUSELS: "/admin/carousels",
     COUPONS: "/admin/coupons",
+    BUSINESS: "/admin/business",
+    BUSINESS_PARTNER: (id: string) => `/admin/business/${id}`,
   },
 } as const;
 

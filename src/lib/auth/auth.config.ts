@@ -3,7 +3,10 @@ import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { AUTH_COPY, AUTH_PROVIDERS, USER_ROLES } from "@/constants/auth";
 import { ROUTES } from "@/constants/routes";
+import { getGoogleAuthCredentials } from "@/lib/auth/google";
 import type { UserRole } from "@/types/user";
+
+const googleCredentials = getGoogleAuthCredentials();
 
 export const authConfig = {
   trustHost: true,
@@ -12,7 +15,14 @@ export const authConfig = {
     signIn: ROUTES.LOGIN,
   },
   providers: [
-    Google,
+    ...(googleCredentials
+      ? [
+          Google({
+            clientId: googleCredentials.clientId,
+            clientSecret: googleCredentials.clientSecret,
+          }),
+        ]
+      : []),
     Credentials({
       name: AUTH_PROVIDERS.CREDENTIALS,
       credentials: {

@@ -38,6 +38,11 @@ export async function findAuthUserByEmail(email: string) {
   return user ? toAuthUser(user) : null;
 }
 
+export async function findAuthUserById(id: string) {
+  const user = await prisma.user.findUnique({ where: { id } });
+  return user ? toAuthUser(user) : null;
+}
+
 export async function upsertGoogleUser(profile: {
   email?: string | null;
   name?: string | null;

@@ -3,9 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "postgresql"
+  // Set at runtime via ensureDatabaseEnv() from NEXT_PUBLIC_SUPABASE_URL + SUPABASE_DB_PASSWORD
+  // (or legacy DATABASE_URL). Prisma CLI uses scripts/with-db-env.mjs.
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -53,6 +54,12 @@ enum WhatsAppLeadContext {
   checkout
 }
 
+enum CreditStatus {
+  UNPAID
+  PARTIAL
+  PAID
+}
+
 model User {
   id                     String    @id @default(cuid())
   name                   String
@@ -67,9 +74,10 @@ model User {
   createdAt              DateTime  @default(now())
   updatedAt              DateTime  @updatedAt
 
-  orders         Order[]
-  reviews        Review[]
-  whatsappClicks WhatsAppClick[]
+  orders            Order[]
+  reviews           Review[]
+  whatsappClicks    WhatsAppClick[]
+  businessPartners  BusinessPartner[]
 
   @@map("users")
 }
@@ -292,4 +300,86 @@ model WhatsAppClick {
   @@index([userId])
   @@index([createdAt])
   @@map("whatsapp_clicks")
+}
+
+model BusinessPartner {
+  id        String   @id @default(cuid())
+  name      String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  expenses BusinessExpense[]
+  credits  BusinessCredit[]
+  sales    BusinessSale[]
+
+  @@index([userId])
+  @@map("business_partners")
+}
+
+model BusinessExpense {
+  id          String          @id @default(cuid())
+  partnerId   String
+  partner     BusinessPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  date        DateTime?
+  productId   String?
+  productName String?
+  price       Float?
+  litres      Float?
+  totalCost   Float?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([partnerId])
+  @@index([date])
+  @@map("business_expenses")
+}
+
+model BusinessCredit {
+  id                     String          @id @default(cuid())
+  partnerId              String
+  partner                BusinessPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  date                   DateTime?
+  shopName               String?
+  productId              String?
+  productName            String?
+  price                  Float?
+  litres                 Float?
+  totalPrice             Float?
+  amountPaid             Float           @default(0)
+  status                 CreditStatus    @default(UNPAID)
+  /// When the shopkeeper said money can be collected
+  expectedCollectionDate DateTime?
+  /// When marked collected (moved to sales)
+  collectedAt            DateTime?
+  /// Linked BusinessSale created on collect (prevents double-create)
+  convertedSaleId        String?
+  createdAt              DateTime        @default(now())
+  updatedAt              DateTime        @updatedAt
+
+  @@index([partnerId])
+  @@index([date])
+  @@index([status])
+  @@index([expectedCollectionDate])
+  @@map("business_credits")
+}
+
+model BusinessSale {
+  id          String          @id @default(cuid())
+  partnerId   String
+  partner     BusinessPartner @relation(fields: [partnerId], references: [id], onDelete: Cascade)
+  date        DateTime?
+  productId   String?
+  productName String?
+  price       Float?
+  litres      Float?
+  totalAmount Float?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([partnerId])
+  @@index([date])
+  @@map("business_sales")
 }

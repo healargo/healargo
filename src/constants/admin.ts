@@ -1,4 +1,5 @@
 import {
+  Briefcase,
   FolderTree,
   Images,
   LayoutDashboard,
@@ -10,6 +11,7 @@ import {
   Users,
   Ticket,
 } from "lucide-react";
+import { BUSINESS_COPY } from "@/constants/business";
 import { ROUTES } from "@/constants/routes";
 import { UI } from "@/constants/ui";
 
@@ -61,6 +63,12 @@ export const ADMIN_NAV = [
     label: "Coupons",
     description: "Discounts & promo codes",
     icon: Ticket,
+  },
+  {
+    href: ROUTES.ADMIN.BUSINESS,
+    label: BUSINESS_COPY.navLabel,
+    description: BUSINESS_COPY.navDescription,
+    icon: Briefcase,
   },
   {
     href: ROUTES.ADMIN.USERS,
@@ -120,7 +128,7 @@ export const ADMIN_USERS_COPY = {
   userCreated: "User created",
   userUpdated: "User updated",
   userDeleted: "User deleted",
-  roleUpdated: "Role updated. Ask the user to sign in again.",
+  roleUpdated: "Role updated. It applies on the next page refresh.",
   updateFailed: "Could not update user",
   createFailed: "Could not create user",
 } as const;

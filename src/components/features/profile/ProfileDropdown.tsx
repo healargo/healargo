@@ -21,6 +21,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { USER_ROLES } from "@/constants/auth";
 import { ROUTES } from "@/constants/routes";
 
 export function ProfileDropdown() {
@@ -56,7 +57,7 @@ export function ProfileDropdown() {
     );
   }
 
-  const isAdmin = session.user.role === "admin";
+  const isAdmin = session.user.role === USER_ROLES.ADMIN;
   const userInitials = session.user.name
     ? session.user.name
         .split(" ")

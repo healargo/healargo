@@ -21,8 +21,11 @@ alwaysApply: false
 - Prefer relational includes (`include: { category: true, items: true }`) over N+1 queries
 - Nested document-style fields use Prisma `Json` (variants, addresses, attribution, etc.)
 
-## Env
+## Env (Mentorbridge-style + Prisma password)
 ```
-DATABASE_URL=   # Supabase pooled connection (6543, pgbouncer)
-DIRECT_URL=     # Supabase direct connection (5432) for migrations
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_DB_PASSWORD=   # used by ensureDatabaseEnv() to derive DATABASE_URL
 ```
+Do not require `DATABASE_URL` / `DIRECT_URL` in `.env` — see `src/lib/db/supabase-database-url.ts`.

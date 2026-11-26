@@ -4,20 +4,30 @@ import Google from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { AUTH_COPY, AUTH_PROVIDERS, USER_ROLES } from "@/constants/auth";
 import { authConfig } from "@/lib/auth/auth.config";
+import { getGoogleAuthCredentials } from "@/lib/auth/google";
 import { credentialsSchema } from "@/lib/auth/schemas";
 import {
   findAuthUserByEmail,
+  findAuthUserById,
   upsertGoogleUser,
 } from "@/lib/auth/users";
 import type { UserRole } from "@/types/user";
+
+const googleCredentials = getGoogleAuthCredentials();
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   trustHost: true,
   providers: [
-    Google({
-      allowDangerousEmailAccountLinking: true,
-    }),
+    ...(googleCredentials
+      ? [
+          Google({
+            clientId: googleCredentials.clientId,
+            clientSecret: googleCredentials.clientSecret,
+            allowDangerousEmailAccountLinking: true,
+          }),
+        ]
+      : []),
     Credentials({
       name: AUTH_PROVIDERS.CREDENTIALS,
       credentials: {
@@ -61,20 +71,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return true;
     },
     async jwt({ token, user }) {
-      if (user?.email) {
-        const dbUser = await findAuthUserByEmail(user.email);
-        if (dbUser) {
-          token.id = String(dbUser._id);
-          token.role = dbUser.role ?? USER_ROLES.USER;
-          token.picture = dbUser.image ?? user.image ?? token.picture;
-          return token;
-        }
-      }
-
       if (user) {
-        token.role = (user.role as UserRole | undefined) ?? USER_ROLES.USER;
         token.id = user.id;
         token.picture = user.image ?? token.picture;
+        if (user.email) token.email = user.email;
+        token.role = (user.role as UserRole | undefined) ?? USER_ROLES.USER;
+      }
+
+      // Always sync role from DB so admin promotions apply without re-login.
+      const dbUser = token.id
+        ? await findAuthUserById(String(token.id))
+        : token.email
+          ? await findAuthUserByEmail(String(token.email))
+          : user?.email
+            ? await findAuthUserByEmail(user.email)
+            : null;
+
+      if (dbUser) {
+        token.id = String(dbUser._id);
+        token.email = dbUser.email;
+        token.role = dbUser.role ?? USER_ROLES.USER;
+        token.picture = dbUser.image ?? token.picture;
       }
 
       return token;

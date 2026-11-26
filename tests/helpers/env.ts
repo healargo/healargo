@@ -10,6 +10,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { parse } from "dotenv";
+import { ensureDatabaseEnv } from "../../src/lib/db/supabase-database-url";
 
 const ROOT = path.resolve(__dirname, "../..");
 
@@ -101,6 +102,20 @@ export function loadTestEnv(fakeUrl = FAKE_SERVICES_URL) {
     const appEnv = { ...readEnvFile(".env"), ...readEnvFile(".env.local") };
     if (appEnv.DATABASE_URL) process.env.DATABASE_URL = appEnv.DATABASE_URL;
     if (!process.env.DIRECT_URL && appEnv.DIRECT_URL) process.env.DIRECT_URL = appEnv.DIRECT_URL;
+    // Mentorbridge-style: derive from Supabase URL + DB password when legacy URLs absent
+    if (!process.env.DATABASE_URL) {
+      if (appEnv.NEXT_PUBLIC_SUPABASE_URL && !process.env.NEXT_PUBLIC_SUPABASE_URL) {
+        process.env.NEXT_PUBLIC_SUPABASE_URL = appEnv.NEXT_PUBLIC_SUPABASE_URL;
+      }
+      if (appEnv.SUPABASE_DB_PASSWORD && !process.env.SUPABASE_DB_PASSWORD) {
+        process.env.SUPABASE_DB_PASSWORD = appEnv.SUPABASE_DB_PASSWORD;
+      }
+      try {
+        ensureDatabaseEnv();
+      } catch {
+        // leave unset; assertDatabaseWritesAllowed will fail clearly
+      }
+    }
   }
   if (!process.env.DIRECT_URL && process.env.DATABASE_URL) {
     process.env.DIRECT_URL = process.env.DATABASE_URL;
